@@ -33,13 +33,13 @@ blink:
     bl off
     bl delay_1s
 	b blink            
-on:
+off:
     mov r2, #1
     mov r2, r2, lsl #16
 	ldr r0,=GPSET0
     str r2, [r0]
 	bx lr
-off:
+on:
     mov r2, #1
     mov r2, r2, lsl #16
 	ldr r0,=GPCLR0

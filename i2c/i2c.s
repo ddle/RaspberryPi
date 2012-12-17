@@ -5,132 +5,195 @@
 .text
 .global _start
 _start:
+@======================= registers map and constants ===========================
+/*
+@ raspberry pi version 1 use I2C_0 on P1-3, P1-5
+.equ I2C0_BASE,  0x20205000 
+.equ C_REG,      0x20205000    @ control register  
+.equ S_REG,      0x20205004    @ status register
+.equ FIFO_REG,   0x20205010    @ data buffer register
+.equ A_REG,      0x2020500C    @ slave address
+.equ DLEN_REG,   0x20205008    @ data length
+*/
 
-@ registers map:
-.equ IDBR, 0x40301688
-.equ ICR , 0x40301690
-.equ ISR , 0x40301698
-.equ GPDR2, 0x40E00014
-.equ GRER2, 0x40E00038
-.equ ICMR , 0x40D00004
-.equ ICIP , 0x40D00000
-.equ GEDR2, 0X40E00050
+@ raspberry pi version 2 use I2C_1 on P1-3, P1-5
+.equ I2C0_BASE,  0x20804000 
+.equ C_REG,      0x20804000    @ control register  
+.equ S_REG,      0x20804004    @ status register
+.equ FIFO_REG,   0x20804010    @ data buffer register
+.equ A_REG,      0x2080400C    @ slave address register
+.equ DLEN_REG,   0x20804008    @ data length
+
+.equ SLAVE_ADDR,        0x4
+
+@ GPIO - status LED
+.equ GPFSEL1,    0x20200004
+.equ GPSET0,     0x2020001C
+.equ GPCLR0,     0x20200028
+.equ S_LED,              16
+
+@ message length
+.equ len,                 4
+
+@==================== initialize status LED ====================================
+    MOV sp,#0x8000       
+    LDR R0,=GPFSEL1
+    LDR R1, [R0]
+    
+    @ GPFSEL1 &= ~(3<<19); // CLEAR 20,19 (AF 00X: gpio)
+    MOV R2, #3
+    MVN R2, R2, lsl #19
+    AND R1, R1, R2
+
+    @ GPFSEL1 |= 1<<18;    // SET 18  (AF 001: gpio-output)
+    MOV R2, #1
+    MOV R2, R2, lsl #18
+    ORR R1, R1, R2
+        
+    STR R1, [R0]   
+    
+@==================== initialize I2C  ==========================================
+@ Description: initialize i2c bus
+@ return none
+@ TODO:
+@ disable internal pull up?
+@ set alternate function 0 (i2c) on SDA0 (GPIO_0) and SCL0 (GPIO_1)
+@ set i2c speed to 100kHZ
+
+i2c_init: 
+@ i2c status register: clear ERR,CLKT,DONE flag
+	LDR R4, =I2C0_BASE      @ use base for register addressing
+	LDR R2, [R4, #0x4]       @ S_REG
+	ORR R2, R2, #0x100       @ write 1 to clear ERR flag, if any
+	ORR R2, R2, #0x200       @ write 1 to clear CLKT flag, if any
+	ORR R2, R2, #0x02        @ write 1 to clear DONE flag
+	STR R2, [R4, #0x4]       @ save to S_REG
+@ i2c control register
+	LDR R1, =C_REG 
+	LDR R0, =0x8030	           @ setting: enable i2c, clear buffer
+	STR R0, [R1]
 	
-@==================== initialize I2C CONTROLLER ================================
-	LDR R10, =ICR		@ I2C CONTROL REGISTER
-	LDR R9, =IDBR		@ I2C DATA BUFFER
-	LDR R8, =ISR		@ I2C STATUS REGISTER	
-	MOV R0, #0x60		@ CONTROL WORD TO ENABLE I2C UNIT, AS MASTER WITH SCL
-	STR R0, [R10]		@ WRITE TO I2C CONTROL REGISTER
-@===============================================================================
-
 @==================== MAINLINE program =========================================
 LOOP:
-B LOOP
-@===============================================================================
-
-@==================== POLLTB procedure =========================================
-@ HALL: PROCEDURE TO POLL ICR[TB] STATUS
-@ ALSO CHECK IF AN ACK ERROR OCCURRED AND ISR[BED] WAS SET
-
-POLLTB:
-	LDR R0, [R8]		@ READ REGISTER CONTEND
-	TST R0, #0x400		@ CHECK IF BED ON BIT 10 IS SET = ACK ERROR
-	MOVNE R0, #1		@ RETURN ERROR CODE = 1 IN R0 IF ACK ERROR
-	BNE EXIT			@ EXIT ON ERROR
-	LDR R0, [R10]		@ I2C CONTROL REGISTER
-	TST R0, #0x08		@ CHECK IF TB ON BIT 3 RESET = 0 FOR TX/RX DONE
-	BNE POLLTB			@ LOOP UNTIL TB BIT = 0
-	MOV PC,LR			@ RETURN
-@===============================================================================
-
-@==================== MAX7313_MOD_REG procedure ================================
-@ PASSING PARAMETTERS NEEDED : 
-@	R2 = INTERNAL REGISTER ADDRESS
-@	R3 = BYTE TO MODIFY
-@	R4 = CLEAR/SET MODE : 0 = CLEAR, 1 = SET, 2 = BLINK MODE
-@ TO USE BLINK MODE, PASS THE DESIRED VALUES TO R3 (ACTIVE LOW, BIT 3-5, OTHER 
-@ BITS SHOULD BE 0, FOR E.G PASS 0b00101000 TO LIGHT LED P4)
-@ RETURN : NONE
-
-MAX7313_MOD_REG:
-@ SAVE REGS
-	STMFD	R13!, {R0-R4, R14}		@ save registers, R14
-@ READ reg PATTERN :
-@ S + SLAVE ADD + W -> [REGISTER ADD] -> S + SLAVE ADD + R -> READ BUFFER -> P
-
-@ START, SEND SLAVE ADDRESS AND R/nW = 0 TO WRITE
-	MOV R0, #0x42		@ ADDRESS : 7BITS + WRITE BIT {7'b0100 001,0}
-	STR R0, [R9]		@ WRITE TO IDBR
-	MOV R0, #0x69		@ SEND WORD TO ICR TB = 1, STOP = 0, START = 1
-	STR R0, [R10]		@ WRITE TO ICR
-	BL POLLTB		@ WAIT FOR BYTE SEND AND ACK RECEIVE
-
-@ SEND INTERNAL REGISTER ADDRESS
-	MOV R0, R2		@ ADDRESS CODE
-	STR R0, [R9]		@ WRITE TO IDBR
-	MOV R0, #0x68		@ SEND WORD TO ICR TB = 1, STOP = 0, START = 0
-	STR R0, [R10]		@ WRITE TO ICR
-	BL POLLTB		@ WAIT FOR BYTE SEND AND ACK RECEIVE
+	BL off
+	BL delay_1s
+	MOV R0, #SLAVE_ADDR        @ Slave address	
+	BL i2c_set7bitSlaveAddress
+	LDR R0, =STRING_0          @ string pointer
+	LDR R1, =LENGTH_0          @ data length
+	MOV R2, #len
+	STR R2, [R1]
+	BL i2c_write
+	BL on
+	BL delay_1s
+	B LOOP
 	
-@ START, SEND SLAVE ADDRESS AND R/nW = 1 TO READ
-	MOV R0, #0x43		@ ADDRESS : 7BITS + read BIT {7'b0100 001,1}
-	STR R0, [R9]		@ WRITE TO IDBR
-	MOV R0, #0x69		@ SEND WORD TO ICR TB = 1, STOP  = 0, START = 1
-	STR R0, [R10]		@ WRITE TO ICR
-	BL POLLTB		@ WAIT FOR BYTE SEND AND ACK RECEIVE
+@==================== set 7 bit slave address  =================================
+@ Description: select slave address (7 bit) at the begining of i2c transactions
+@ Params:
+@	R0 = 7 bit address
+@ Return: none
+
+i2c_set7bitSlaveAddress:
+	STMFD	R13!, {R1, LR}	@ save registers, R14
+	LDR R1, =A_REG 
+	STR R0, [R1]
+	LDMFD	R13!, {R1, PC} 	@ restore resister and return
 	
-@ SET UP READ RANGE BYTES SENT FROM MAX7313	
-	MOV R0, #0x68		@ SEND WORD TO ICR TB = 1, STOP = 0, START = 0
-	STR R0, [R10]		@ WRITE TO ICR
-	BL POLLTB		@ WAIT FOR BYTE SEND AND ACK RECEIVE
+@==================== i2c write transactions ===================================
+@ Description: write data string to i2c bus
+@ Params
+@	R0 = pointer to data
+@	R1 = pointer to length of data
+@ Return: error status
+@ TODO: 
+@ check params validity
+
+i2c_write:
+	STMFD	R13!, {R1-R4, LR}	@ save registers, LR
 	
-@ READ REGISTER CONTENT ON BUFFER THEN STOP
-	LDR R1, [R9]		@ READ BUFFER
-	MOV R0, #0x6E		@ SEND TO ICR TB = 1,STOP = 1,START = 0,ACK=1
-	STR R0, [R10]		@ WRITE TO ICR
-	BL POLLTB		@ WAIT FOR BYTE SEND AND ACK RECEIVE
+	LDR R4, =I2C0_BASE          @ use base for register addressing
+@ set data length
+	LDR R2, [R1]
+	STR R2, [R4, #0x8]          @ set data length in DLEN_REG
+	
+@ configure write transaction
+	LDR R2, [R4]                @ get C_REG content
+	MVN R3, #0x1                @ mask for clearing READ bit (= Write)		
+	AND R2, R2, R3
+@ clear buffer before transmit and set start bit
+	MOV R3, #0xA0               @ mask for setting CLEAR bits and START bit
+	ORR R2, R2, R3          
+	STR R2, [R4] 
+	
+@ now send ALL data bytes to FIFO until DONE
+transmit_loop:
+	LDR R2, [R4, #0x4]          @ get S_REG content
+	
+	TST R2, #0x100              @ check if bit 8 ERR is set (NACK)
+	MOVNE R0, #2                @ return error code 2	
+	BNE transmit_ERR2           @ exit on error
+	
+	TST R0, #0x200              @ check if bit 9 CLKT is set (timeout)
+	MOVNE R0, #1                @ return error code 1	
+	BNE transmit_ERR1           @ exit on error
+	
+	TST R2, #0x2                @ test DONE bit, 1 == all data have been sent
+	MOVNE R0, #0                @ return error code 0	
+	BNE transmit_done           @ exit
+	
+	TST R2, #0x10               @ test TXD bit, 0 == FIFO is FULL
+	BEQ transmit_loop           @ if FIFO is FULL, poll again until avaiable
+	
+	LDR R2, [R1]                @ else get remaining number of bytes to be sent
+	CMP R2, #0x0                @ check if there are still data in waiting
+	BEQ transmit_loop           @ all bytes sent to FIFO, poll for DONE signal
+		
+	LDR R3, [R0], #1            @ else get the next byte and increment pointer
+	STR R3, [R4, #0x10]         @ sent to FIFO	
+	SUB R2, R2, #1              @ decrement byte counter
+	STR R2, [R1]                @ save counter back to memory
+	B transmit_loop             @ next byte...
 
-@ MODIFY 
-	CMP R4,#0		@ IF MODE == CLEAR
-	BICEQ R1, R1, R3	@ APPLY CLEAR
-	BEQ ENDMOD
-	CMP R4,#1		@ IF MODE == SET
-	ORREQ R1, R1, R3	@ APPLY SET
-	BEQ ENDMOD
-				@ ELSE : BLINK MODE
-	BIC R1, R1, #0x38	@ CLEAR BIT 3,4,5 FIRST
-	ORR R1, R1, R3		@ THEN MASK WITH VALUE ON R3
-
-ENDMOD:
-@ WRITE BACK TO INTERNAL REGISTER
-@ WRITE PATTERN : {101}+SLAVE ADD+W->{100}[REGISTER ADD]->{110} DATA BYTE
-@ SEND SLAVE ADDRESS AND R/nW = 0 TO WRITE
-	MOV R0, #0x42		@ ADDRESS : 7BITS + WRITE BIT {7'b0100 001,0}
-	STR R0, [R9]		@ WRITE TO IDBR
-	MOV R0, #0x69		@ SEND WORD TO ICR TB = 1, STOP = 0, START = 1
-	STR R0, [R10]		@ WRITE TO ICR
-@ WAIT FOR BYTE SEND AND ACK RECEIVE
-	BL POLLTB
-@ SEND INTERNAL REGISTER ADDRESS
-	MOV R0, R2		@ ADDRESS CODE FOR CONFIGURATION REGISTER P0-P7
-	STR R0, [R9]		@ WRITE TO IDBR
-	MOV R0, #0x68		@ SEND WORD TO ICR TB = 1, STOP = 0, START = 0
-	STR R0, [R10]		@ WRITE TO ICR
-@ WAIT FOR BYTE SEND AND ACK RECEIVE
-	BL POLLTB
-@ SEND BYTE TO MODIFY
-	STRB R1, [R9]		@ WRITE TO IDBR
-	MOV R0, #0x6A		@ SEND WORD TO ICR TB = 1, STOP = 1, START = 0
-	STR R0, [R10]		@ WRITE TO ICR
-@ WAIT FOR BYTE SEND AND ACK RECEIVE
-	BL POLLTB
-@ RESTORE AND RETURN	
-	LDMFD	R13!, {R0-R4, PC} 		@ restore resister and pc
-@===============================================================================
-
-@============================END OF PROGRAM=======================================
+transmit_ERR2:
+	ORR R2, R2, #0x100          @ write 1 to clear ERR flag, if any
+transmit_ERR1:
+	ORR R2, R2, #0x200          @ write 1 to clear CLKT flag, if any
+transmit_done:	
+	ORR R2, R2, #0x02           @ write 1 to clear DONE flag
+	STR R2, [R4, #0x4]          @ save to S_REG
+	LDMFD	R13!, {R1-R4, PC} 	@ restore resister and pc
+	
+@========================== Delay loop =========================================
+delay_1s:
+	LDR	R1, =0x01FFFFF		@ init register counter value ~ 1 second
+	DELAY_LOOP:				@ REPEAT
+	SUBS	R1, R1, #1		@ decrease counter by 1 and set flag
+	BNE	DELAY_LOOP			@ UNTIL counter = 0 (Z flag set)
+	bx lr
+	
+@========================== LED ON/OFF =========================================
+off:
+    MOV R2, #1
+    MOV R2, R2, lsl #S_LED
+	LDR R0,=GPSET0
+    STR R2, [R0]
+	BX LR
+on:
+    MOV R2, #1
+    MOV R2, R2, lsl #S_LED
+	LDR R0,=GPCLR0
+    STR R2, [R0]
+	BX LR
+	
+@=========================== END OF PROGRAM ====================================
 EXIT:
 	NOP
+.data
+
+STRING_0: .byte 0x1, 0x2, 0x3, 0x4
+.align 2
+LENGTH_0: .word len
+
 .end
 

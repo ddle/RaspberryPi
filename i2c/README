@@ -1,0 +1,8 @@
+
+----------------------------
+ref 
+	-C lib 
+		http://alanbarr.github.com/RaspberryPi-GPIO/i2c_8c_source.html
+		https://github.com/alanbarr/RaspberryPi-GPIO
+	-python lib 
+		http://learn.adafruit.com/using-the-bmp085-with-raspberry-pi/configuring-the-pi-for-i2cls
