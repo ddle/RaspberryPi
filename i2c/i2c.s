@@ -38,9 +38,9 @@ _start:
 @ message length
 .equ len,                14
 
-    LDR SP, =STACK             @ setup stack
-    ADD SP, SP, #256           @ 
-    BL led_init                @ initialize status led for indicator
+	LDR SP, =STACK             @ setup stack
+	ADD SP, SP, #256           @ 
+	BL led_init                @ initialize status led for indicator
 	BL i2c_init
 @==================== MAINLINE program =========================================
 @ put HMC5883 into operating mode, see Datasheet page 18
