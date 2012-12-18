@@ -6,6 +6,8 @@ MEMORY
 
 SECTIONS
 {
-    .text : { *(.text*) } > ram
+    .text : { *(.text*) *(.glue_7t) *(.glue_7) } > ram
+    .data : { *(.data*) } > ram
     .bss : { *(.bss*) } > ram
 }
+

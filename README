@@ -22,4 +22,5 @@ notes:
 	  (memmap) and startup code (vector.s)	  
 	- Assembly: "makefile". code includes main.s amd linker script (memmap)
 
+3. I2C driver in polling mode (Master) 
 
