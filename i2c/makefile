@@ -1,11 +1,16 @@
-#***********************************************************************
+#*******************************************************************************
+# Makefile for Cross-Compile to ARM target. Tested with RaspberryPi v2
+# Dung Le, 2012
+#
 # Usage:
 # - change "NAME" below with your assembly program
 # - build (assembling and linking):
 #   > make
-# - launch debugger:
+# - debug:
 #   > make db
-#***********************************************************************
+# note: kernel.img can be preloaded to SDcard
+#
+#*******************************************************************************
 
 NAME = i2c
 
@@ -19,10 +24,13 @@ DB   = gdb-multiarch
 AFLAGS  = -gstabs+ -warn -fatal-warnings
 LFLAGS  = -T memmap
 
-OBJS = $(NAME).o
+OBJS = $(NAME).o delay.o led.o
 
-all: $(NAME).elf
+all: $(NAME).elf kernel.img
 
+kernel.img:	$(NAME)
+	$(OBJCOPY) -O binary $< $@
+	
 $(NAME).elf: $(NAME)
 	$(OBJCOPY) $< $@
 
@@ -36,4 +44,4 @@ db: $(NAME).elf
 	$(DB) -x gdbscript $<
 	
 clean:
-	rm -f *.lst *.elf *.mp *.o $(NAME)
+	rm -f *.lst *.elf *.mp *.o $(NAME) kernel.img
