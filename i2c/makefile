@@ -7,23 +7,33 @@
 #   > make db
 #***********************************************************************
 
-# change this to your assembly program's name
 NAME = i2c
 
-LD   = arm-elf-ld
-AS   = arm-elf-as
+CROSS_COMPILE ?= arm-elf
+CC := $(CROSS_COMPILE)-gcc
+LD := $(CROSS_COMPILE)-ld
+AS := $(CROSS_COMPILE)-as
+OBJCOPY := $(CROSS_COMPILE)-objcopy
 #DB   = arm-elf-insight
 DB   = gdb-multiarch
-AFLAGS  = -ad=$(NAME).lst -gstabs
-LFLAGS  = --M $(NAME).mp -T memmap
+AFLAGS  = -gstabs+ -warn -fatal-warnings
+LFLAGS  = -T memmap
 
-all:
-	$(AS) $(NAME).s -o $(NAME).o $(AFLAGS) 
-	$(LD) $(NAME).o -o $(NAME).elf $(LFLAGS)
+OBJS = $(NAME).o
 
-db:
-	$(AS) $(NAME).s -o $(NAME).o $(AFLAGS) 
-	$(LD) $(NAME).o -o $(NAME).elf $(LFLAGS)
-	$(DB) -x gdbscript $(NAME).elf
+all: $(NAME).elf
+
+$(NAME).elf: $(NAME)
+	$(OBJCOPY) $< $@
+
+$(NAME): $(OBJS)	
+	$(LD) $^ -o $@ $(LFLAGS) --M $@.mp
+
+%.o: %.s
+	$(AS) $< -o $@ $(AFLAGS) -ad=$*.lst
+
+db: $(NAME).elf
+	$(DB) -x gdbscript $<
+	
 clean:
-	-rm $(NAME).lst $(NAME).elf $(NAME).mp $(NAME).o
+	rm -f *.lst *.elf *.mp *.o $(NAME)

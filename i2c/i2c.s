@@ -33,23 +33,21 @@ _start:
 .equ S_LED,              16
 
 @ message length
-.equ len,                 4
+.equ len,                 14
 
+    LDR SP, =STACK
+    ADD SP, SP, #256
 @==================== initialize status LED ====================================
-    MOV sp,#0x8000       
     LDR R0,=GPFSEL1
-    LDR R1, [R0]
-    
+    LDR R1, [R0]    
     @ GPFSEL1 &= ~(3<<19); // CLEAR 20,19 (AF 00X: gpio)
     MOV R2, #3
     MVN R2, R2, lsl #19
     AND R1, R1, R2
-
     @ GPFSEL1 |= 1<<18;    // SET 18  (AF 001: gpio-output)
     MOV R2, #1
     MOV R2, R2, lsl #18
     ORR R1, R1, R2
-        
     STR R1, [R0]   
     
 @==================== initialize I2C  ==========================================
@@ -62,12 +60,12 @@ _start:
 
 i2c_init: 
 @ i2c status register: clear ERR,CLKT,DONE flag
-	LDR R4, =I2C0_BASE      @ use base for register addressing
-	LDR R2, [R4, #0x4]       @ S_REG
-	ORR R2, R2, #0x100       @ write 1 to clear ERR flag, if any
-	ORR R2, R2, #0x200       @ write 1 to clear CLKT flag, if any
-	ORR R2, R2, #0x02        @ write 1 to clear DONE flag
-	STR R2, [R4, #0x4]       @ save to S_REG
+	LDR R4, =I2C0_BASE         @ use base for register addressing
+	LDR R2, [R4, #0x4]         @ S_REG
+	ORR R2, R2, #0x100         @ write 1 to clear ERR flag, if any
+	ORR R2, R2, #0x200         @ write 1 to clear CLKT flag, if any
+	ORR R2, R2, #0x02          @ write 1 to clear DONE flag
+	STR R2, [R4, #0x4]         @ save to S_REG
 @ i2c control register
 	LDR R1, =C_REG 
 	LDR R0, =0x8030	           @ setting: enable i2c, clear buffer
@@ -95,10 +93,10 @@ LOOP:
 @ Return: none
 
 i2c_set7bitSlaveAddress:
-	STMFD	R13!, {R1, LR}	@ save registers, R14
+	STMFD	R13!, {R1, LR}	    @ save registers, R14
 	LDR R1, =A_REG 
 	STR R0, [R1]
-	LDMFD	R13!, {R1, PC} 	@ restore resister and return
+	LDMFD	R13!, {R1, PC} 	    @ restore resister and return
 	
 @==================== i2c write transactions ===================================
 @ Description: write data string to i2c bus
@@ -111,12 +109,10 @@ i2c_set7bitSlaveAddress:
 
 i2c_write:
 	STMFD	R13!, {R1-R4, LR}	@ save registers, LR
-	
 	LDR R4, =I2C0_BASE          @ use base for register addressing
 @ set data length
 	LDR R2, [R1]
 	STR R2, [R4, #0x8]          @ set data length in DLEN_REG
-	
 @ configure write transaction
 	LDR R2, [R4]                @ get C_REG content
 	MVN R3, #0x1                @ mask for clearing READ bit (= Write)		
@@ -153,6 +149,7 @@ transmit_loop:
 	STR R3, [R4, #0x10]         @ sent to FIFO	
 	SUB R2, R2, #1              @ decrement byte counter
 	STR R2, [R1]                @ save counter back to memory
+	
 	B transmit_loop             @ next byte...
 
 transmit_ERR2:
@@ -166,11 +163,11 @@ transmit_done:
 	
 @========================== Delay loop =========================================
 delay_1s:
-	LDR	R1, =0x01FFFFF		@ init register counter value ~ 1 second
-	DELAY_LOOP:				@ REPEAT
-	SUBS	R1, R1, #1		@ decrease counter by 1 and set flag
-	BNE	DELAY_LOOP			@ UNTIL counter = 0 (Z flag set)
-	bx lr
+	LDR	R1, =0x02FFFFF          @ init register counter value ~ 1 second
+	DELAY_LOOP:                 @ REPEAT
+	SUBS	R1, R1, #1          @ decrease counter by 1 and set flag
+	BNE	DELAY_LOOP              @ UNTIL counter = 0 (Z flag set)
+	BX LR
 	
 @========================== LED ON/OFF =========================================
 off:
@@ -189,11 +186,14 @@ on:
 @=========================== END OF PROGRAM ====================================
 EXIT:
 	NOP
+	
 .data
-
-STRING_0: .byte 0x1, 0x2, 0x3, 0x4
+STRING_0: .ascii "hello world!\r\n"
 .align 2
 LENGTH_0: .word len
-
+.align 2
+STACK:    .rept 256
+          .byte 0x0
+          .endr
 .end
 
