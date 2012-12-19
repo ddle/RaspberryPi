@@ -8,11 +8,12 @@ references:
 notes:
 	- to build, type make. There are makefiles for both C and Asm frameworks	
 	- to debug, use "make db". This starts remote gdb (serial) section using the
-	  gdbscript. Then "load <binary>" to upload. The debug framework inludes: 	  
+	  gdbscript. Then "load <binary>" to upload. The debug framework requires: 	  
 		  + gdb-multiarch		  
 		  + serial connection to ARM target via uart (3 wires tx,rx and gnd)		  
 		  + bootloader preloaded in the target board. see "rpi-gdb"
-
+		  + A reset button is nice to have (solder on P6 pins, near HDMI port)
+	
 1. rpi-gdb: bootloader for serial debug
 	- to use, just copy content of bootloader folder to SD card
 	
