@@ -1,5 +1,11 @@
+blink the status LED on board. 
+--------------------------------
+This example project uses custom makefiles for two different frameworks	
+- Assembly: "Makefile". code includes main.s amd linker script (memmap)
+- C : "c_Makefile". codes include all related C files, linker script
+  (memmap) and startup code (vector.s)	  
 
---- info about the C related sources ---
+--- info about the C related sources from author ---
 ref: https://github.com/dwelch67/raspberrypi
 
 This simple example sets up a small stack, not much to this program
