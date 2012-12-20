@@ -20,6 +20,7 @@ layout is
 ref http://openocd.sourceforge.net/doc//pdf/openocd.pdf
 	- should have the tool installed first (openocd), under Linux use
 	  "apt-get install openocd"
+	- copy (jtag) bootloader to sdcard (kernel.img, bootcode.bin, start.elf)
 	- make sure the ftdi driver for the deviceis install
 	- run "openocd -f arm-usb-ocd.cfg -f raspi.cfg". This should starts server 
 	  and waiting for connections
