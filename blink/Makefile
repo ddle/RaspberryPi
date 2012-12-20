@@ -1,47 +1,38 @@
-#*******************************************************************************
-# Makefile for Cross-Compile to ARM target. Tested with RaspberryPi v2
-# Dung Le, 2012
-#
-# Usage:
-# - change "NAME" below with your assembly program
-# - build (assembling and linking):
-#   > make
-# - debug:
-#   > make db
-# note: kernel.img can be preloaded to SDcard
-#
-#*******************************************************************************
 
-NAME = main
-
-CROSS_COMPILE ?= arm-elf
-CC := $(CROSS_COMPILE)-gcc
-LD := $(CROSS_COMPILE)-ld
-AS := $(CROSS_COMPILE)-as
-OBJCOPY := $(CROSS_COMPILE)-objcopy
-#DB   = arm-elf-insight
+#ARMGNU ?= arm-linux-gnueabi
+ARMGNU ?= arm-elf
+AOPS = --warn --fatal-warnings 
+COPS = -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding 
 DB   = gdb-multiarch
-AFLAGS  = -gstabs+ -warn -fatal-warnings
-LFLAGS  = -T memmap
+gcc : blinker01.hex blinker01.bin
 
-OBJS = $(NAME).o
+all : gcc clang
 
-all: $(NAME).elf kernel.img
+clean :
+	rm -f *.o
+	rm -f *.bin
+	rm -f *.hex
+	rm -f *.elf
+	rm -f *.list
+	rm -f *.img
+	rm -f *.bc
+	rm -f *.clang.opt.s
 
-kernel.img:	$(NAME)
-	$(OBJCOPY) -O binary $< $@
-	
-$(NAME).elf: $(NAME)
-	$(OBJCOPY) $< $@
-
-$(NAME): $(OBJS)	
-	$(LD) $^ -o $@ $(LFLAGS) --M $@.mp
-
-%.o: %.s
-	$(AS) $< -o $@ $(AFLAGS) -ad=$*.lst
-
-db: $(NAME).elf
+db: blinker01.elf
 	$(DB) -x gdbscript $<
-	
-clean:
-	rm -f *.lst *.elf *.mp *.o $(NAME) kernel.img
+vectors.o : vectors.s
+	$(ARMGNU)-as vectors.s -o vectors.o
+
+blinker01.o : blinker01.c
+	$(ARMGNU)-gcc $(COPS) -c blinker01.c -o blinker01.o -g
+
+blinker01.elf : memmap vectors.o blinker01.o 
+	$(ARMGNU)-ld vectors.o blinker01.o -T memmap -o blinker01.elf
+	$(ARMGNU)-objdump -D blinker01.elf > blinker01.list
+
+blinker01.bin : blinker01.elf
+	$(ARMGNU)-objcopy blinker01.elf -O binary blinker01.bin
+
+blinker01.hex : blinker01.elf
+	$(ARMGNU)-objcopy blinker01.elf -O ihex blinker01.hex
+

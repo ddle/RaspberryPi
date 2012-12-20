@@ -18,6 +18,8 @@ clean :
 	rm -f *.bc
 	rm -f *.clang.opt.s
 
+db: blinker01.elf
+	$(DB) -x gdbscript $<
 vectors.o : vectors.s
 	$(ARMGNU)-as vectors.s -o vectors.o
 
