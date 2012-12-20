@@ -3,10 +3,11 @@
 ARMGNU ?= arm-elf
 AOPS = --warn --fatal-warnings 
 COPS = -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding 
-DB   = gdb-multiarch
+SDB   = gdb-multiarch
+JDB   = $(ARMGNU)-gdb
 gcc : blinker01.hex blinker01.bin
 
-all : gcc clang
+all : gcc
 
 clean :
 	rm -f *.o
@@ -18,10 +19,14 @@ clean :
 	rm -f *.bc
 	rm -f *.clang.opt.s
 
-db: blinker01.elf
-	$(DB) -x gdbscript $<
+sdb: blinker01.elf
+	$(SDB) -x gdbscript $<
+
+jdb: blinker01.elf
+	$(JDB) -x jtag_gdbscript $<	
+
 vectors.o : vectors.s
-	$(ARMGNU)-as vectors.s -o vectors.o
+	$(ARMGNU)-as vectors.s -o vectors.o -g
 
 blinker01.o : blinker01.c
 	$(ARMGNU)-gcc $(COPS) -c blinker01.c -o blinker01.o -g

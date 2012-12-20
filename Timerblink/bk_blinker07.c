@@ -25,23 +25,44 @@ extern unsigned int GET32 ( unsigned int );
 
 
 extern void enable_irq ( void );
-
+ 	unsigned int ra;
+   // unsigned int rb;
+   // unsigned int rc;
+    unsigned int rx;
+    unsigned int interval;
 //------------------------------------------------------------------------
 volatile unsigned int irq_counter;
 //-------------------------------------------------------------------------
+void on()
+{
+	PUT32(GPCLR0,1<<16); //led on
+}
+void off()
+{
+	PUT32(GPSET0,1<<16); //led off
+}
 void c_irq_handler ( void )
 {
-    irq_counter++;
-    PUT32(CS,2);
+	PUT32(CS,2);
+	if (irq_counter == 0){
+		on();
+    	irq_counter = 1;
+    }
+    else
+    {
+    	off();
+    	irq_counter = 0;
+    }
+    ra=irq_counter;
+    rx+=interval;
+    PUT32(C1,rx);
 }
+
+
 //------------------------------------------------------------------------
 int notmain ( void )
 {
-    unsigned int ra;
-    unsigned int rb;
-    unsigned int rc;
-    unsigned int rx;
-    unsigned int interval;
+   
 
     //make gpio pin tied to the led an output
     ra=GET32(GPFSEL1);
@@ -51,137 +72,21 @@ int notmain ( void )
     PUT32(GPSET0,1<<16); //led off
 //    PUT32(GPCLR0,1<<16); //led on
 
-if(1)
-{
-    //just poll the system timer counter itself and use that to
-    //measure time
-
-    interval=0x00200000;
-
-    rx=GET32(CLO);
-    for(rb=0;rb<3;rb++)
-    {
-        while(1)
-        {
-            ra=GET32(CLO);
-            rc=ra-rx;
-            if(rc>=interval) break;
-        }
-        rx+=interval;
-        PUT32(GPCLR0,1<<16); //led on
-        while(1)
-        {
-            ra=GET32(CLO);
-            rc=ra-rx;
-            if(rc>=interval) break;
-        }
-        rx+=interval;
-        PUT32(GPSET0,1<<16); //led off
-    }
-}
-
-if(1)
-{
-    //use the counter match and the counter match flag in the counter
-    //status register
-
-    interval=0x00100000;
-    rx=GET32(CLO);
-    rx+=interval;
-    PUT32(C1,rx);
-    PUT32(CS,2);
-    for(rb=0;rb<4;rb++)
-    {
-        while(1)
-        {
-            ra=GET32(CS);
-            if(ra&2) break;
-        }
-        rx+=interval;
-        PUT32(C1,rx);
-        PUT32(CS,2);
-
-        PUT32(GPCLR0,1<<16); //led on
-
-        while(1)
-        {
-            ra=GET32(CS);
-            if(ra&2) break;
-        }
-        rx+=interval;
-        PUT32(C1,rx);
-        PUT32(CS,2);
-
-        PUT32(GPSET0,1<<16); //led off
-    }
-}
-
-if(1)
-{
-    //poll the interrupt status
-    interval=0x00200000;
-    rx=GET32(CLO);
-    rx+=interval;
-    PUT32(C1,rx);
-    PUT32(CS,2);
-    PUT32(0x2000B210,0x00000002);
-    for(rb=0;rb<3;rb++)
-    {
-        while(1)
-        {
-            ra=GET32(0x2000B204);
-            if(ra&2)
-            {
-                rx+=interval;
-                PUT32(C1,rx);
-                PUT32(CS,2);
-                break;
-            }
-        }
-        PUT32(GPCLR0,1<<16); //led on
-        while(1)
-        {
-            ra=GET32(0x2000B204);
-            if(ra&2)
-            {
-                rx+=interval;
-                PUT32(C1,rx);
-                PUT32(CS,2);
-                break;
-            }
-        }
-        PUT32(GPSET0,1<<16); //led off
-    }
-}
 
 //rely on the interrupt to measure time.
 
     irq_counter=0;
     ra=irq_counter;
-    interval=0x00080000;
+    interval=0x14240;
     rx=GET32(CLO);
     rx+=interval;
     PUT32(C1,rx);
     PUT32(CS,2);
     PUT32(0x2000B210,0x00000002);
     enable_irq();
+    
     while(1)
-    {
-        while(irq_counter==ra) continue;
-        ra=irq_counter;
-        rx+=interval;
-        PUT32(C1,rx);
-
-        PUT32(GPCLR0,1<<16); //led on
-
-        while(irq_counter==ra) continue;
-        ra=irq_counter;
-        rx+=interval;
-        PUT32(C1,rx);
-
-        PUT32(GPSET0,1<<16); //led off
-        interval+=0x10000;
-        if(interval==0) interval=0x00080000;
+    {   
     }
 
 

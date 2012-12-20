@@ -12,7 +12,7 @@
 #
 #*******************************************************************************
 
-NAME = main
+NAME = blinker07
 
 CROSS_COMPILE ?= arm-elf
 CC := $(CROSS_COMPILE)-gcc
@@ -24,9 +24,9 @@ SDB   = gdb-multiarch
 JDB   = $(CROSS_COMPILE)-gdb
 AFLAGS  = -gstabs+ -warn -fatal-warnings
 LFLAGS  = -T memmap
-
-OBJS = $(NAME).o
-
+COPS = -Wall -Werror -O2 -nostdlib -nostartfiles -ffreestanding -g
+ 
+OBJS = $(NAME).o vectors.o
 
 all: $(NAME).elf kernel.img
 
@@ -42,11 +42,14 @@ $(NAME): $(OBJS)
 %.o: %.s
 	$(AS) $< -o $@ $(AFLAGS) -ad=$*.lst
 
+%.o: %.c
+	$(CC) $< -o $@ $(COPS)
+
 sdb:$(NAME).elf
 	$(SDB) -x gdbscript $<
 
 jdb: $(NAME).elf
-	$(JDB) $<	
+	$(JDB) -x jtag_gdbscript $<	
 	
 clean:
 	rm -f *.lst *.elf *.mp *.o $(NAME) kernel.img

@@ -12,7 +12,7 @@
 #
 #*******************************************************************************
 
-NAME = main
+NAME = timer_interrupt
 
 CROSS_COMPILE ?= arm-elf
 CC := $(CROSS_COMPILE)-gcc
@@ -20,13 +20,11 @@ LD := $(CROSS_COMPILE)-ld
 AS := $(CROSS_COMPILE)-as
 OBJCOPY := $(CROSS_COMPILE)-objcopy
 #DB   = arm-elf-insight
-SDB   = gdb-multiarch
-JDB   = $(CROSS_COMPILE)-gdb
+DB   = gdb-multiarch
 AFLAGS  = -gstabs+ -warn -fatal-warnings
 LFLAGS  = -T memmap
 
-OBJS = $(NAME).o
-
+OBJS = $(NAME).o led.o timer.o interrupt.o vectors.o
 
 all: $(NAME).elf kernel.img
 
@@ -42,11 +40,8 @@ $(NAME): $(OBJS)
 %.o: %.s
 	$(AS) $< -o $@ $(AFLAGS) -ad=$*.lst
 
-sdb:$(NAME).elf
-	$(SDB) -x gdbscript $<
-
-jdb: $(NAME).elf
-	$(JDB) $<	
+db: $(NAME).elf
+	$(DB) -x gdbscript $<
 	
 clean:
 	rm -f *.lst *.elf *.mp *.o $(NAME) kernel.img

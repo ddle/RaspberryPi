@@ -1,0 +1,17 @@
+"Bare metal" I2C driver for raspberry pi
+Copyright by Dung Le, 2012
+----------------------------------------
+Description:
+- Routines defined : i2c_read, i2c_write, i2c_flush_fifo, i2c_init
+- A "main" loop is implemented as an example of using these routines
+- The setup is:
+  compass sensor <--- I2C ---> RaspberryPi <--- I2C ---> Arduino
+  (sending slave 0x1E)            master                (receiving slave 0x4)
+- external pull up on signal line may required
+
+references 
+-C lib 
+	http://alanbarr.github.com/RaspberryPi-GPIO/i2c_8c_source.html
+	https://github.com/alanbarr/RaspberryPi-GPIO
+-python lib 
+	http://learn.adafruit.com/using-the-bmp085-with-raspberry-pi/configuring-the-pi-for-i2cls

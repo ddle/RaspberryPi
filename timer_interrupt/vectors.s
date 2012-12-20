@@ -48,7 +48,7 @@ reset:
     ;@mov r0,#0x53
     ;@msr cpsr_c, r0
 
-    bl notmain
+    b _main
 hang: b hang
 
 .globl PUT32
@@ -83,17 +83,18 @@ BRANCHTO:
 .globl dummy
 dummy:
     bx lr
-
+/*
 .globl enable_irq
 enable_irq:
     mrs r0,cpsr
     bic r0,r0,#0x80
     msr cpsr_c,r0
     bx lr
-
+*/
+.global irq
 irq:
     push {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
-    bl c_irq_handler
+    bl irq_handler
     pop  {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
     subs pc,lr,#4
 
