@@ -1,4 +1,4 @@
-OCD Jtag with GDB tests
+OCD Jtag with GDB
 -------------------------
 from this project
 https://github.com/dwelch67/raspberrypi/tree/master/armjtag
