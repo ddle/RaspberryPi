@@ -1,5 +1,5 @@
-OCD Jtag tests
-------------------
+OCD Jtag with GDB tests
+-------------------------
 from this project
 https://github.com/dwelch67/raspberrypi/tree/master/armjtag
 
@@ -28,4 +28,4 @@ ref http://openocd.sourceforge.net/doc//pdf/openocd.pdf
 	- under gdb connect to target with "target remote :3333"
 	- download code to target with "load file.elf"
 	- proceed with normal gdb command
-	- sometimes target is not "halt", use "monitor halt"
+	- sometimes if target is not "halt", use "monitor halt"

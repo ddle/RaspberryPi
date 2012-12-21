@@ -1,5 +1,5 @@
 "Bare metal" I2C driver for raspberry pi
-Copyright by Dung Le, 2012
+Dung Le, 2012
 ----------------------------------------
 Description:
 - Routines defined : i2c_read, i2c_write, i2c_flush_fifo, i2c_init

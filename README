@@ -21,7 +21,7 @@ notes:
 	This example project uses custom makefiles for two different frameworks	
 	- C : "c_Makefile". codes include all related C files, linker script
 	  (memmap) and startup code (vector.s)	  
-	- Assembly: "makefile". code includes main.s amd linker script (memmap)
+	- Assembly: "a_Makefile". code includes main.s amd linker script (memmap)
 
 3. I2C driver in polling mode (Master) 
 
