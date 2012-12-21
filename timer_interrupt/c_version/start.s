@@ -18,8 +18,8 @@ irq_handler:        .word irq
 fiq_handler:        .word hang
 
 reset:
-	mov sp,#0x8000
-	bl main
+    mov sp,#0x8000
+    bl main
 
 hang: b hang
 

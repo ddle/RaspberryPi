@@ -1,13 +1,3 @@
-
-//-------------------------------------------------------------------------
-//-------------------------------------------------------------------------
-
-// The raspberry pi firmware at the time this was written defaults
-// loading at address 0x8000.  Although this bootloader could easily
-// load at 0x0000, it loads at 0x8000 so that the same binaries built
-// for the SD card work with this bootloader.  Change the ARMBASE
-// below to use a different location.
-
 #define ARMBASE 0x8000
 #define CS 0x20003000
 #define CLO 0x20003004
@@ -57,22 +47,16 @@ void c_irq_handler ( void )
     PUT32(C1,rx);
 }
 
-
 //------------------------------------------------------------------------
 int main ( void )
 {
-   	irq_init();
+	irq_init();
 	
-    //make gpio pin tied to the led an output
     ra=GET32(GPFSEL1);
     ra&=~(7<<18);
     ra|=1<<18;
     PUT32(GPFSEL1,ra);
     PUT32(GPSET0,1<<16); //led off
-//    PUT32(GPCLR0,1<<16); //led on
-
-
-//rely on the interrupt to measure time.
 
     irq_counter=0;
     ra=irq_counter;
@@ -87,7 +71,6 @@ int main ( void )
     while(1)
     {   
     }
-
 
     return(0);
 }
