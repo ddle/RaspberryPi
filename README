@@ -28,7 +28,7 @@ notes:
 4. ocd_jtag: bootloader for jtag debugging; config files for ARM-USB-OCD and 
    is raspberrypi pi are included
    
-5. Timerblink and timer_interrupt are under tested. The debug tools (serial and
-   jtag) have issues with the current bootloader ( does not reponse after 
-   a breakpoint at interuppt). This could caused by the interrupt vectors not 
-   set up properly
+5. Timerblink (c) and timer_interrupt (assembly): examples of using interrupt. 
+   The serial debug tool still has issues with the current bootloader 
+   ( does not response after a breakpoint at interuppt). This could caused by 
+   interrupt vectors are not set up properly
