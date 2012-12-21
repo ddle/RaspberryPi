@@ -22,7 +22,7 @@ ref http://openocd.sourceforge.net/doc//pdf/openocd.pdf
 	  "apt-get install openocd"
 	- copy (jtag) bootloader to sdcard (kernel.img, bootcode.bin, start.elf)
 	- make sure the ftdi driver for the deviceis install
-	- run "openocd -f arm-usb-ocd.cfg -f raspi.cfg". This should starts server 
+	- run "openocd -f arm-usb-ocd.cfg -f raspi.cfg". This should start up server 
 	  and waiting for connections
 	- open another terminal and use the gdb toolchain, e.g, arm-elf-gdb file.elf
 	- under gdb connect to target with "target remote :3333"

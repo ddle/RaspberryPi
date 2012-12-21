@@ -2,6 +2,7 @@ ARMGNU ?= arm-elf
 
 COPS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding 
 JDB   = $(ARMGNU)-gdb
+SDB   = gdb-multiarch
 
 gcc : blinker07.hex blinker07.bin
 
@@ -35,3 +36,6 @@ blinker07.hex : blinker07.elf
 	
 jdb: blinker07.elf
 	$(JDB) -x jtag_gdbscript $<	
+
+sdb: blinker07.elf
+	$(SDB) -x gdbscript $<	

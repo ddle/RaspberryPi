@@ -24,7 +24,7 @@ extern void PUT32 ( unsigned int, unsigned int );
 extern unsigned int GET32 ( unsigned int );
 //------------------------------------------------------------------------
 extern void irq_enable ( void );
-//extern void irq_init ( void );
+extern void irq_init ( void );
 //------------------------------------------------------------------------
 unsigned int ra;
 unsigned int rx;
@@ -50,7 +50,7 @@ void c_irq_handler ( void )
     else
     {
     	off();
-    	irq_counter = 0;x
+    	irq_counter = 0;
     }
     rx=GET32(CLO);    
     rx+=interval;
@@ -61,7 +61,7 @@ void c_irq_handler ( void )
 //------------------------------------------------------------------------
 int main ( void )
 {
-   	//irq_init();
+   	irq_init();
 	
     //make gpio pin tied to the led an output
     ra=GET32(GPFSEL1);
@@ -76,7 +76,7 @@ int main ( void )
 
     irq_counter=0;
     ra=irq_counter;
-    interval=0xF4240;
+    interval=0x14240;
     rx=GET32(CLO);
     rx+=interval;
     PUT32(C1,rx);

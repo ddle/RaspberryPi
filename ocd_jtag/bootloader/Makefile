@@ -1,9 +1,11 @@
 
-ARMGNU ?= arm-none-eabi
-
+#ARMGNU ?= arm-none-eabi
+ARMGNU ?= arm-elf
 COPS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding 
+SDB   = gdb-multiarch
+JDB   = $(ARMGNU)-gdb
 
-all : armjtag.hex armjtag.bin fastblink.elf
+all : armjtag.hex armjtag.bin blinker07.elf
 
 clean :
 	rm -f *.o
@@ -13,14 +15,9 @@ clean :
 	rm -f *.list
 	rm -f *.img
 
-vectors.o : vectors.s
-	$(ARMGNU)-as vectors.s -o vectors.o
 
-armjtag.o : armjtag.c
-	$(ARMGNU)-gcc $(COPS) -c armjtag.c -o armjtag.o
-
-armjtag.elf : memmap vectors.o armjtag.o 
-	$(ARMGNU)-ld vectors.o armjtag.o -T memmap -o armjtag.elf
+armjtag.elf : vectors.o armjtag.o asm.o
+	$(ARMGNU)-ld vectors.o armjtag.o asm.o -T memmap -o armjtag.elf
 	$(ARMGNU)-objdump -D armjtag.elf > armjtag.list
 
 armjtag.bin : armjtag.elf
@@ -29,11 +26,18 @@ armjtag.bin : armjtag.elf
 armjtag.hex : armjtag.elf
 	$(ARMGNU)-objcopy armjtag.elf -O ihex armjtag.hex
 
+%.o: %.s
+	$(ARMGNU)-as $< -o $@ -g
 
-fastblink.o : fastblink.c
-	$(ARMGNU)-gcc $(COPS) -c fastblink.c -o fastblink.o
+%.o: %.c
+	$(ARMGNU)-gcc $(COPS) -c $< -o $@ -g
 
-fastblink.elf : memmap vectors.o fastblink.o 
-	$(ARMGNU)-ld vectors.o fastblink.o -T memmap -o fastblink.elf
-	$(ARMGNU)-objdump -D fastblink.elf > fastblink.list
+blinker07.elf : start.o asm.o blinker07.o interrupt.o 
+	$(ARMGNU)-ld $^ -T memmap -o $@
+	$(ARMGNU)-objdump -D blinker07.elf > blinker07.list
 
+sdb: blinker07.elf
+	$(SDB) -x gdbscript $<
+
+jdb: blinker07.elf
+	$(JDB) -x jtag_gdbscript $<	

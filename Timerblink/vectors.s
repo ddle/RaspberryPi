@@ -24,10 +24,10 @@ fiq_handler:        .word hang
 reset:
     mov r0,#0x8000
     mov r1,#0x0000
-    ldmia r0!,{r2,r3,r4,r5,r6,r7,r8,r9}
-    stmia r1!,{r2,r3,r4,r5,r6,r7,r8,r9}
-    ldmia r0!,{r2,r3,r4,r5,r6,r7,r8,r9}
-    stmia r1!,{r2,r3,r4,r5,r6,r7,r8,r9}
+    ldmfd r0!,{r3-r10}
+    stmfd r1!,{r3-r10}
+    ldmfd r0!,{r3-r10}
+    stmfd r1!,{r3-r10}
 
     ;@ (PSR_IRQ_MODE|PSR_FIQ_DIS|PSR_IRQ_DIS)
     mov r0,#0xD2
@@ -48,7 +48,7 @@ reset:
     ;@mov r0,#0x53
     ;@msr cpsr_c, r0
 
-    bl notmain
+    bl main
 hang: b hang
 
 .globl PUT32
@@ -84,8 +84,8 @@ BRANCHTO:
 dummy:
     bx lr
 
-.globl enable_irq
-enable_irq:
+.globl irq_enable
+irq_enable:
     mrs r0,cpsr
     bic r0,r0,#0x80
     msr cpsr_c,r0
