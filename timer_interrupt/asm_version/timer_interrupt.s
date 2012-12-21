@@ -4,10 +4,10 @@
 @ 
 @ Description:
 @===============================================================================
-.global _main
-_main:
+.global main
+main:
 
-.equ INTERVAL, 0x30D              @ 200000 us
+.equ INTERVAL, 0xF4240              @ 1s
 
 	LDR SP, =STACK             @ setup stack
 	ADD SP, SP, #256           @ 
@@ -15,7 +15,7 @@ _main:
 	BL led_off
 	Bl led_on
 	BL irq_init
-	LDR R0, =0xF4240           
+	LDR R0, =INTERVAL           
 	BL timer1_next_event
 	BL irq_enable
 	

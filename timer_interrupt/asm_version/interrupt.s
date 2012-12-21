@@ -14,11 +14,13 @@ irq_enable:
     
 .globl irq_init
 irq_init:
-	MOV	R0, #0x18               @ Load interrupt IRQ vector at address 0x18
+	@MOV	R0, #0x18               @ Load interrupt IRQ vector at address 0x18
+	LDR	R0, =0x18               @ Load interrupt IRQ vector at address
 	LDR	R4, [R0]                @ Read content of interrupt vector table at 0x18
 	LDR	R1, =0xFFF              @ construct mask
 	AND 	R4, R4, R1          @ Mask all but offset of part of intruction
-	ADD	R4, R4, #0x20           @ build absolute address of IRQ procedure in literal pool
+	LDR R0, =0x20
+	ADD	R4, R4, R0              @ build absolute address of IRQ procedure in literal pool
 	LDR	R1, [R4]                @ Read BTLDR IRQ address from pool
 	STR	R1, BTLDR_IRQ_ADDRESS   @ save BTLDR IRQ for later use
 	LDR	R1, =INTR_DIRECTOR      @ load address of our INTERRUPT procedure
