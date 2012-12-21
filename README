@@ -4,7 +4,6 @@ Dung Le, 2012
 references:
 	- https://github.com/dwelch67/raspberrypi	
 	- bootloader for serial debug https://github.com/jamieiles/rpi-gdb
-
 notes:
 	- to build, type make. There are makefiles for both C and Asm frameworks	
 	- to debug, use "make db". This starts remote gdb (serial) section using the
@@ -26,9 +25,8 @@ notes:
 3. I2C driver in polling mode (Master) 
 
 4. ocd_jtag: bootloader for jtag debugging; config files for ARM-USB-OCD and 
-   is raspberrypi pi are included
+   raspberrypi pi
    
 5. Timerblink (c) and timer_interrupt (assembly): examples of using interrupt. 
    The serial debug tool still has issues with the current bootloader 
-   ( does not response after a breakpoint at interuppt). This could caused by 
-   interrupt vectors are not set up properly
+   ( does not response after a breakpoint at interuppt). 
