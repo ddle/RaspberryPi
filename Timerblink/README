@@ -1,7 +1,6 @@
-
-See the top level README file for more information on documentation
-and how to run these programs.
-
+This is a simplified version of David Welch's blinker07, with added debug support
+Below is a nice description from author
+----------------------------------------------------------
 Derived from prior blinker examples and uart04, this is an example using
 the system timer interrupt.
 
