@@ -21,7 +21,7 @@ ref http://openocd.sourceforge.net/doc//pdf/openocd.pdf
 	- should have the tool installed first (openocd), under Linux use
 	  "apt-get install openocd"
 	- copy (jtag) bootloader to sdcard (kernel.img, bootcode.bin, start.elf)
-	- make sure the ftdi driver for the deviceis install
+	- make sure the ftdi driver for the device is installed
 	- run "openocd -f arm-usb-ocd.cfg -f raspi.cfg". This should start up server 
 	  and waiting for connections
 	- open another terminal and use the gdb toolchain, e.g, arm-elf-gdb file.elf

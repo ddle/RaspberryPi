@@ -1,0 +1,12 @@
+Assembly version of timer interrupt with interuppt vectors preloaded. 
+Dung Le, 2012
+------------------------------
+The bootloader should set up interrupt vectors at starting address 0x0. 
+Then in our program, to use interrupt, we simply place our  irq_handler address
+to the irq vector at 0x38
+
+bootloader: https://github.com/ddle/RaspberryPi/tree/master/ocd_jtag
+
+Note: currently the serial debug tool still has issues with the current bootloader 
+( does not response after a breakpoint at interuppt). The Jtag debug tool works
+nicely however.

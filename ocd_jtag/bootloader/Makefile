@@ -5,7 +5,7 @@ COPS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding
 SDB   = gdb-multiarch
 JDB   = $(ARMGNU)-gdb
 
-all : armjtag.hex armjtag.bin blinker07.elf
+all : armjtag.hex armjtag.bin 
 
 clean :
 	rm -f *.o
@@ -32,12 +32,3 @@ armjtag.hex : armjtag.elf
 %.o: %.c
 	$(ARMGNU)-gcc $(COPS) -c $< -o $@ -g
 
-blinker07.elf : start.o asm.o blinker07.o interrupt.o 
-	$(ARMGNU)-ld $^ -T memmap -o $@
-	$(ARMGNU)-objdump -D blinker07.elf > blinker07.list
-
-sdb: blinker07.elf
-	$(SDB) -x gdbscript $<
-
-jdb: blinker07.elf
-	$(JDB) -x jtag_gdbscript $<	
