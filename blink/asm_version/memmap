@@ -1,0 +1,13 @@
+
+MEMORY
+{
+    ram : ORIGIN = 0x8000, LENGTH = 0x10000
+}
+
+SECTIONS
+{
+    .text : { *(.text*) *(.glue_7t) *(.glue_7) } > ram
+    .data : { *(.data*) } > ram
+    .bss : { *(.bss*) } > ram
+}
+

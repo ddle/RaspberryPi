@@ -12,7 +12,7 @@
 #
 #*******************************************************************************
 
-NAME = i2c
+NAME = main
 
 CROSS_COMPILE ?= arm-elf
 CC := $(CROSS_COMPILE)-gcc
@@ -21,11 +21,13 @@ AS := $(CROSS_COMPILE)-as
 OBJCOPY := $(CROSS_COMPILE)-objcopy
 OBJDUMP := $(CROSS_COMPILE)-objdump
 
-DB   = gdb-multiarch
+SDB   = gdb-multiarch
+JDB   = $(CROSS_COMPILE)-gdb
 AFLAGS  = -gstabs+ -warn -fatal-warnings
 LFLAGS  = -T memmap
 
-OBJS = $(NAME).o delay.o led.o
+OBJS = $(NAME).o
+
 
 all: $(NAME).elf kernel.img
 
@@ -35,16 +37,18 @@ kernel.img:	$(NAME)
 $(NAME).elf: $(NAME)
 	$(OBJCOPY) $< $@
 	$(OBJDUMP) -D $@ > $(NAME).lst
-
+	
 $(NAME): $(OBJS)	
 	$(LD) $^ -o $@ $(LFLAGS) --M $@.mp
-	
 
 %.o: %.s
 	$(AS) $< -o $@ $(AFLAGS)
 
-db: $(NAME).elf
-	$(DB) -x gdbscript $<
+sdb:$(NAME).elf
+	$(SDB) -x gdbscript $<
+
+jdb: $(NAME).elf
+	$(JDB) $<	
 	
 clean:
 	rm -f *.lst *.elf *.mp *.o $(NAME) kernel.img
