@@ -10,10 +10,11 @@ notes:
 		+ serial connection to ARM target via uart (3 wires tx,rx and gnd)		  
 		+ bootloader preloaded in the target board. see "rpi-gdb"
 		+ A reset button is nice to have (solder on P6 pins, near HDMI port)
-		+ start debug section: "gdb-multiarch -x gdbscript <file.elf>" 
+		+ start debug section: "gdb-multiarch -x gdbscript <file.elf>" or "make sdb"
 	- jtag debug https://github.com/ddle/RaspberryPi/tree/master/ocd_jtag
+		+ "make jdb"
 	
-1. rpi-gdb: bootloader for serial debug
+1. rpi-gdb: bootloader for serial debug, (updated: also enable jtag debug)
 	- to use, just copy content of bootloader folder to SD card
 	
 2. blink: blink the status LED on board.
@@ -25,4 +26,4 @@ notes:
    
 5. timer_interrupt: examples of using interrupt. 
    The serial debug tool still has issues with the current bootloader 
-   ( does not response after a breakpoint at interuppt). 
+   ( does not response after a breakpoint at interuppt )

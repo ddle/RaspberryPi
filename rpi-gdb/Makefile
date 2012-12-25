@@ -3,6 +3,7 @@ CROSS_COMPILE ?= arm-linux-gnueabi-
 CC := $(CROSS_COMPILE)gcc
 LD := $(CROSS_COMPILE)ld
 OBJCOPY := $(CROSS_COMPILE)objcopy
+OBJDUMP := $(CROSS_COMPILE)objdump
 
 CPPFLAGS := -ggdb -nostdlib -nostdinc -ffreestanding -marm -O2 -march=armv6zk \
 	    -Wall -Werror
@@ -21,7 +22,8 @@ all:	install
 
 kernel.img:	loader
 	$(OBJCOPY) -O binary $< $@
-
+	$(OBJDUMP) -D $< > kernel.lst
+	
 loader:	loader.o
 	$(CC) $^ -o $@ $(LDFLAGS) -T ldscript_loader.X
 
@@ -30,6 +32,7 @@ loader.o:	loader.S rsp.img
 
 rsp.img:	rsp
 	$(OBJCOPY) -O binary $< $@
+	$(OBJDUMP) -D $< > rsp.lst
 
 rsp:	$(OBJS)
 	$(CC) $^ -o $@ $(LDFLAGS) -T ldscript.X

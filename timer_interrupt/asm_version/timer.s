@@ -35,16 +35,16 @@ timer1_next_event:
 	STR R2, [R1]                @ reset current counter value to 0
 @ clear detected match if any
 	LDR R1, =CS                 @ get current match status
-	@LDR R2, [R1]
+	LDR R2, [R1]
 	MOV R3, #0x2                @ mask to write bit 1 (timer 1) to clear status
-	@ORR R2, R2, R3
-	STR R3, [R1]
+	ORR R2, R2, R3
+	STR R2, [R1]
 @ enable timer interrupt 
 	LDR R1, =IRQ1_EN            @ interrupt enable reg
-	@LDR R2, [R1]
+	LDR R2, [R1]
 	MOV R3, #0x2                @ mask to set bit 1 (timer 1)
-	@ORR R2, R2, R3              @ set bit 1
-	STR R3, [R1]
+	ORR R2, R2, R3              @ set bit 1
+	STR R2, [R1]
 	LDMFD	R13!, {R0-R3, PC} 	@ restore resister and return
 
 

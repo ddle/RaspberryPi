@@ -9,11 +9,9 @@ main:
 
 .equ INTERVAL, 0xF4240              @ 1s
 
-	LDR SP, =STACK             @ setup stack
-	ADD SP, SP, #256           @ 
+	@LDR SP, =STACK             @ setup stack
+	@ADD SP, SP, #256           @ 
 	BL led_init
-	BL led_off
-	Bl led_on
 	BL irq_init
 	LDR R0, =INTERVAL           
 	BL timer1_next_event

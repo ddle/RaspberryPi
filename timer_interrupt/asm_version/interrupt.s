@@ -14,8 +14,9 @@ irq_enable:
     
 .globl irq_init
 irq_init:
-	@MOV	R0, #0x18               @ Load interrupt IRQ vector at address 0x18
-	LDR	R0, =0x18               @ Load interrupt IRQ vector at address
+
+	MOV	R0, #0x18               @ Load interrupt IRQ vector at address 0x18
+	@LDR	R0, =0x18               @ Load interrupt IRQ vector at address
 	LDR	R4, [R0]                @ Read content of interrupt vector table at 0x18
 	LDR	R1, =0xFFF              @ construct mask
 	AND 	R4, R4, R1          @ Mask all but offset of part of intruction
@@ -26,9 +27,14 @@ irq_init:
 	LDR	R1, =INTR_DIRECTOR      @ load address of our INTERRUPT procedure
 	STR	R1, [R4]                @ store this address in pool
 	BX LR
-	
+
 INTR_DIRECTOR:
 	STMFD    R13!, {R0-R12, LR} @ save registers, R14
+	@ clear detected match if any
+	LDR R1, =0x2000B204            @ read current pending irq
+	LDR R2, [R1]
+
+	TST R2, #0x2	
     BL irq_handler
 	LDMFD    R13!, {R0-R12, LR} @ restore resister and return
 	SUBS PC, LR, #4	

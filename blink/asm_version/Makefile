@@ -48,7 +48,7 @@ sdb:$(NAME).elf
 	$(SDB) -x gdbscript $<
 
 jdb: $(NAME).elf
-	$(JDB) $<	
+	$(JDB) -x jtag_gdbscript $<	
 	
 clean:
 	rm -f *.lst *.elf *.mp *.o $(NAME) kernel.img

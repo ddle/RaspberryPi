@@ -26,7 +26,7 @@ JDB   = $(CROSS_COMPILE)-gdb
 AFLAGS  = -gstabs+ -warn -fatal-warnings
 LFLAGS  = -T memmap
 
-OBJS = $(NAME).o led.o timer.o interrupt.o start.o
+OBJS =  start.o $(NAME).o led.o timer.o interrupt.o
 
 all: $(NAME).elf kernel.img
 
