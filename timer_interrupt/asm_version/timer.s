@@ -1,8 +1,6 @@
 @===============================================================================
-
-@  Copyright by Dung Le, 2012
-@ 
-@ Description:
+@ Example Timer setup on timer 1
+@ Copyright by Dung Le, 2012
 @===============================================================================
 
 @======================= registers map and constants ===========================
@@ -26,14 +24,15 @@
 
 .global timer1_next_event
 timer1_next_event: 
-	STMFD	R13!, {R0-R3, LR}	@ save registers, LR
+    STMFD    R13!, {R0-R3, LR}    @ save registers, LR
 @ set the time interval for next event
-	LDR R1, =CLO                @ counter address
-	LDR R2, [R1]                @ get current running counter 
-	ADD R2, R2, R0              @ set expire time for next event
-	LDR R1, =C1                 @ counter match address
-	STR R2, [R1]                @ reset current counter value to 0
+    LDR R1, =CLO                @ counter address
+    LDR R2, [R1]                @ get current running counter 
+    ADD R2, R2, R0              @ set expire time for next event
+    LDR R1, =C1                 @ counter match address
+    STR R2, [R1]                @ reset current counter value to 0
 @ clear detected match if any
+<<<<<<< HEAD
 	LDR R1, =CS                 @ get current match status
 	LDR R2, [R1]
 	MOV R3, #0x2                @ mask to write bit 1 (timer 1) to clear status
@@ -46,9 +45,21 @@ timer1_next_event:
 	ORR R2, R2, R3              @ set bit 1
 	STR R2, [R1]
 	LDMFD	R13!, {R0-R3, PC} 	@ restore resister and return
+=======
+    LDR R1, =CS                 @ get current match status
+    MOV R3, #0x2                @ mask to write bit 1 (timer 1) to clear status
+    STR R3, [R1]
+@ enable timer interrupt 
+    LDR R1, =IRQ1_EN            @ interrupt enable reg
+    LDR R2, [R1]
+    MOV R3, #0x2                @ mask to set bit 1 (timer 1)
+    ORR R2, R2, R3              @ set bit 1
+    STR R2, [R1]
+    LDMFD    R13!, {R0-R3, PC}  @ restore resister and return
+>>>>>>> b7c46901c7958a0757bf40799f5330bcb7c60af6
 
 
 
-	
+    
 
 
