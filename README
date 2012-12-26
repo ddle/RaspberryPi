@@ -6,7 +6,7 @@ references:
 	- bootloader for serial debug https://github.com/jamieiles/rpi-gdb
 notes:
 	- There are makefiles for both C and Asm frameworks
-	- Serial gdb (serial) setup:	
+	- Serial gdb setup (Linux):	
 		+ serial connection to ARM target via uart (3 wires tx,rx and gnd)		  
 		+ bootloader preloaded in the target board. see "rpi-gdb"
 		+ A reset button is nice to have (solder on P6 pins, near HDMI port)
@@ -14,7 +14,7 @@ notes:
 	- jtag debug https://github.com/ddle/RaspberryPi/tree/master/ocd_jtag
 		+ "make jdb"
 	
-1. rpi-gdb: bootloader for serial debug, (updated: also enable jtag debug)
+1. rpi-gdb: bootloader for serial debug, (updated: also enable jtag port)
 	- to use, just copy content of bootloader folder to SD card
 	
 2. blink: blink the status LED on board.
