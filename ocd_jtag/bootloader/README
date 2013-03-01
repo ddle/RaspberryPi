@@ -1,10 +1,10 @@
 jtag bootloader
 -------------------
-Bootloader which interrupt vectors starting at 0x0 (kernel.img) and jtag support
-To use just copy content of binary folder to SD card, blinking led indicates 
+Bootloader with interrupt vectors starting at 0x0 (kernel.img) and jtag support.
+To use, copy content of binary folder to SD card. Blinking led after boot indicates 
 it is working properly. 
 
-start.elf and bootcode.bin are executed first (GPU setup...) then pass on 
+start.elf and bootcode.bin are executed first (GPU setup...) then passed on 
 to kernel.img which copies the interrupt vectors to 0x0 and initializes jtag pins
 
 
